@@ -27,14 +27,12 @@ public class JwtUtils {
   private int jwtExpirationMs;
 
   public String generateJwtToken(Authentication authentication) {
-    UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-
     return Jwts.builder()
-        .setSubject(userPrincipal.getUsername())
+        .setSubject((String) authentication.getPrincipal())
         .setIssuedAt(new Date())
         .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
         .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)),
-            SignatureAlgorithm.HS512)
+            SignatureAlgorithm.HS256)
         .compact();
   }
 

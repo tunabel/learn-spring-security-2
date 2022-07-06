@@ -43,7 +43,7 @@ public class User {
   private String email;
 
   @NotBlank
-  @Column(length = 20)
+  @Column(length = 100)
   private String password;
 
 
