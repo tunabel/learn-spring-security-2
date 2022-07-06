@@ -1,4 +1,4 @@
-package com.example.springsecurity2.service;
+package com.example.springsecurity2.service.impl;
 
 import com.example.springsecurity2.dto.JwtResponse;
 import com.example.springsecurity2.dto.LoginRequest;

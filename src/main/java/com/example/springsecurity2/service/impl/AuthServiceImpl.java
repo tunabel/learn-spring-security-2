@@ -4,13 +4,18 @@ import com.example.springsecurity2.constant.RoleEnum;
 import com.example.springsecurity2.dto.JwtResponse;
 import com.example.springsecurity2.dto.LoginRequest;
 import com.example.springsecurity2.dto.SignupRequest;
+import com.example.springsecurity2.dto.TokenRefreshRequest;
+import com.example.springsecurity2.dto.TokenRefreshResponse;
 import com.example.springsecurity2.exception.InvalidRequestException;
+import com.example.springsecurity2.exception.TokenRefreshException;
+import com.example.springsecurity2.model.RefreshToken;
 import com.example.springsecurity2.model.Role;
 import com.example.springsecurity2.model.User;
 import com.example.springsecurity2.repository.RoleRepository;
 import com.example.springsecurity2.repository.UserRepository;
 import com.example.springsecurity2.security.dto.UserDetailsImpl;
 import com.example.springsecurity2.security.jwt.JwtUtils;
+import com.example.springsecurity2.service.RefreshTokenService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,6 +50,9 @@ public class AuthServiceImpl implements AuthService {
   @Autowired
   UserDetailsServiceImpl userDetailsService;
 
+  @Autowired
+  RefreshTokenService refreshTokenService;
+
   @Override
   public JwtResponse getJwtFromLoginRequest(LoginRequest loginRequest) {
     Authentication authentication = authenticationManager.authenticate(
@@ -59,11 +67,15 @@ public class AuthServiceImpl implements AuthService {
     List<String> roles = userDetails.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority)
         .collect(Collectors.toList());
+
+    RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
     return new JwtResponse(jwt,
         userDetails.getId(),
         userDetails.getUsername(),
         userDetails.getEmail(),
-        roles);
+        roles,
+        refreshToken.getToken());
   }
 
   @Override
@@ -96,5 +108,20 @@ public class AuthServiceImpl implements AuthService {
     user.setRoles(roles);
     userRepository.save(user);
     return user.getId();
+  }
+
+  @Override
+  public TokenRefreshResponse generateJwtFromRefreshTokenRequest(TokenRefreshRequest request) {
+
+    String requestRefreshToken = request.getRefreshToken();
+    return refreshTokenService.findByToken(requestRefreshToken)
+        .map(refreshTokenService::verifyExpiration)
+        .map(RefreshToken::getUser)
+        .map(user -> {
+          String token = jwtUtils.generateTokenFromUsername(user.getUsername());
+          return new TokenRefreshResponse(token, requestRefreshToken);
+        })
+        .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+            "Refresh token is not in database!"));
   }
 }

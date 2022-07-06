@@ -2,6 +2,8 @@ package com.example.springsecurity2.controller;
 
 import com.example.springsecurity2.dto.LoginRequest;
 import com.example.springsecurity2.dto.SignupRequest;
+import com.example.springsecurity2.dto.TokenRefreshRequest;
+import com.example.springsecurity2.service.RefreshTokenService;
 import com.example.springsecurity2.service.impl.AuthService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +32,10 @@ public class AuthController {
   public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
     int userId = authService.registerUser(signUpRequest);
     return new ResponseEntity<>("UserId: " + userId, HttpStatus.CREATED);
+  }
+
+  @PostMapping("/refreshtoken")
+  public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
+    return ResponseEntity.ok(authService.generateJwtFromRefreshTokenRequest(request));
   }
 }
