@@ -40,7 +40,7 @@ public class JwtUtils {
       return Jwts.parserBuilder()
           .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
           .build()
-          .parseClaimsJwt(token)
+          .parseClaimsJws(token)
           .getBody()
           .getSubject();
     } catch (JwtException ex) {
@@ -54,7 +54,7 @@ public class JwtUtils {
       Jwts.parserBuilder()
           .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
           .build()
-          .parseClaimsJwt(token);
+          .parseClaimsJws(token);
       return true;
     } catch (SignatureException e) {
       log.error("Invalid JWT signature: {}", e.getMessage());
