@@ -1,6 +1,5 @@
 package com.example.springsecurity2.security.jwt;
 
-import com.example.springsecurity2.security.dto.UserDetailsImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
